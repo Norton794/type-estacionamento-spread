@@ -1,7 +1,7 @@
 interface IVeiculo {
   nome: string;
   placa: string;
-  entrada?: Date;
+  entrada: Date;
 }
 
 (function () {
@@ -9,8 +9,10 @@ interface IVeiculo {
     document.querySelector(query);
 
   function patio() {
-    function ler() {}
-    function add(veiculo: IVeiculo) {
+    function ler(): IVeiculo[] {
+        return localStorage.patio ? JSON.parse(localStorage.patio) : []
+    }
+    function add(veiculo: IVeiculo, salvo?: boolean) {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${veiculo.nome}</td>
@@ -20,13 +22,23 @@ interface IVeiculo {
         `;
 
       $("#patio")?.appendChild(row);
+      if(salvo) salvar([...ler(), veiculo])
+      
     }
     function del() {}
-    function salvar() {}
-    function render() {}
+    function salvar(veiculos: IVeiculo[]) {
+        localStorage.setItem("patio", JSON.stringify(veiculos))
+    }
+    function render() {
+        $("#patio")!.innerHTML = "";
+        const patio = ler()
+        if(patio.length){
+            patio.forEach(veiculo => add(veiculo));
+        }
+    }
     return { ler, add, del, salvar, render };
   }
-
+  patio().render()
   $("#cadastrar")?.addEventListener("click", () => {
     const nome: string | undefined = $("#nome")?.value;
     const placa: string | undefined = $("#placa")?.value;
@@ -36,6 +48,6 @@ interface IVeiculo {
       return;
     }
 
-    patio().add({ nome, placa, entrada: new Date() });
+    patio().add({ nome, placa, entrada: new Date() }, true);
   });
 })();
